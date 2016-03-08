@@ -5,7 +5,7 @@ matrix:
 
   include:
     - php: 7
-      env: UNIT_TESTS=yes FUNCTIONAL_TESTS=yes ACCEPTANCE_TESTS=yes PHP_LINT=yes XLF_CHECK=yes SUBMODULE_TEST=yes
+      env: UNIT_TESTS=yes FUNCTIONAL_TESTS=yes ACCEPTANCE_TESTS=yes PHP_LINT=yes XLF_CHECK=yes SUBMODULE_TEST=yes PATH_LENGTH_TEST=yes
 
 sudo: false
 
@@ -101,3 +101,15 @@ script:
               fi
           "
       fi
+  - >
+    if [[ "$PATH_LENGTH_TEST" == "yes" ]]; then
+        echo;
+        echo "Checking for file paths longer than 130 characters";
+
+        git archive -o "${TRAVIS_COMMIT}.zip" $TRAVIS_COMMIT
+
+        if [[ `zipinfo -1 "${TRAVIS_COMMIT}.zip" | egrep ".{131,}" | wc -l` -ne 0 ]]; then
+            echo "Found file paths exceeding 130 characters in repository";
+            exit 99;
+        fi
+    fi
